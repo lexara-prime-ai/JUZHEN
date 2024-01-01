@@ -44,7 +44,7 @@ impl Matrix {
             let mut tmp_row: Vec<f64> = Vec::new();
 
             for ent in entries {
-                tmp_row.push(ent.parse::<f64>().unwrap());
+                tmp_row.push(ent.parse::<f64>().expect("FAILED TO PARSE_FLOAT"));
             }
             data.push(tmp_row);
         }
