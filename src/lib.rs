@@ -37,7 +37,7 @@ impl Matrix {
 
     pub fn from_string(input: &str) -> Self {
         let mut data: Vec<Vec<f64>> = Vec::new();
-        let rows: Vec<&str> = input.split(";").collect();
+        let rows: Vec<&str> = input.split(';').collect();
 
         for row in rows {
             let entries: Vec<&str> = row.split_whitespace().collect();
@@ -173,6 +173,95 @@ impl Matrix {
         // Handle situations where values are extremely close to 0 or another number
         correct(self);
     }
+
+    pub fn cofactor(&self, expanded_row: usize, j: usize) -> f64 {
+        // cut -> The new matrix that will be created
+        let mut cut: Vec<Vec<f64>> = Vec::new();
+        // Creates a smaller matrix by deleting the expanded row
+        for r in 0..self.rows {
+            if r == expanded_row {
+                continue;
+            }
+
+            let mut v: Vec<f64> = Vec::new();
+            for c in 0..self.cols {
+                if c == j {
+                    continue;
+                }
+                v.push(self.data[r][c]);
+            }
+            cut.push(v);
+        }
+        let n_r: usize = cut.len();
+        let n_c: usize = cut[0].len();
+        // minor -> The DETERMINANT
+        let minor: f64 = Matrix {
+            rows: n_r,
+            cols: n_c,
+            data: cut,
+        }
+        .det();
+        let base: i32 = -1;
+
+        minor * f64::from(base.pow((expanded_row + j) as u32))
+    }
+
+    pub fn det(&self) -> f64 {
+        // Finding the determinant of a matrix is a RECUSSIVE function
+        // With the COFACTORS
+        // COFACTORS require the DETERMINANT and the DETERMINANT requires the COFACTOR
+        if self.rows != self.cols {
+            panic!("Determinant requires matrix to be a square. Input matrix was {self:?}");
+        }
+
+        if self.rows == 2 && self.cols == 2 {
+            self.data[0][0] * self.data[1][1] - self.data[0][1] * self.data[1][0]
+        } else {
+            let row: usize = 1;
+            let mut det = 0.0;
+
+            // Expand upon the 2nd row
+            for j in 0..self.data[row].len() {
+                // Multiply by the element at the matrix
+                det += self.cofactor(row, j) * self.data[row][j];
+            }
+
+            det
+        }
+    }
+
+    pub fn transpose(&self) -> Self {
+        let mut t: Matrix = Matrix::new(self.cols, self.rows);
+
+        for i in 0..self.rows {
+            for j in 0..self.cols {
+                t.data[j][i] = self.data[i][j];
+            }
+        }
+        t
+    }
+
+    pub fn inverse(&self) -> Self {
+        let d: f64 = self.det();
+
+        if d == 0.0 {
+            panic!("Determinant is 0 so there can be no inverse!");
+        }
+
+        let mut inv: Matrix = Matrix::new(self.rows, self.cols);
+
+        for row in 0..self.rows {
+            for col in 0..self.cols {
+                inv.data[row][col] = self.cofactor(row, col);
+            }
+        }
+
+        correct(&mut inv);
+
+        inv = inv.transpose();
+        inv.apply(|x| x / d);
+        inv
+    }
 }
 
 fn swap_rows(m: &mut Matrix, row: usize) {
@@ -205,11 +294,11 @@ fn correct(m: &mut Matrix) {
                 m.data[row][col] = elem.round();
             }
 
-            if elem > 0.0 && elem < 0.000001 {
+            if elem > 0.0 && elem < 0.0000001 {
                 m.data[row][col] = 0.0;
             }
 
-            if elem < 0.0 && elem > -0.000001 {
+            if elem < 0.0 && elem > -0.0000001 {
                 m.data[row][col] = 0.0;
             }
         }
