@@ -146,4 +146,26 @@ impl Matrix {
         }
         dp
     }
+
+    pub fn rref(&mut self) {
+        if self.data[0][0] == 0.0 {
+            swap_rows(self, 0);
+        }
+    }
+
+}
+
+fn swap_rows(m: &mut Matrix, row: usize) {
+    let mut n_r: usize = 0;
+
+    for r in 0..m.rows {
+        if m.data[r][0] > 0.0 {
+            n_r = r;
+            break;
+        }
+    }
+
+    let temp: Vec<f64> = m.data[row].clone();
+    m.data[row] = m.data[n_r].clone();
+    m.data[n_r] = temp;
 }
