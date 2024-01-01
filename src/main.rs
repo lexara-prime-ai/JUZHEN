@@ -7,6 +7,8 @@ use juzhen::Matrix;
     let m2: Matrix = Matrix::from_file("src/file.txt");
     println!("Output: {m2:?}");
 
-    let m3: Matrix = Matrix::from_string("3, 6, 12 ; 2, 3, 6 ; 7 6 5");
-    println!("Output: {m3:?}");
+    let mut m3: Matrix = Matrix::from_string("3 6 12 ; 2 3 6 ; 7 6 5");
+    m3.print();
+    m3.apply(|o| o+2.0);
+    m3.print();
 }

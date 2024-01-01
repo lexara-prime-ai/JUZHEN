@@ -62,6 +62,7 @@ impl Matrix {
         let mut data: Vec<Vec<f64>> = Vec::new();
 
         for row in &self.data {
+            // Can use .to_owned()
             data.push(row.to_vec());
         }
         Self {
@@ -69,5 +70,80 @@ impl Matrix {
             cols: self.cols,
             data,
         }
+    }
+
+    pub fn print(&self) {
+        self.data.iter().for_each(|v| println!("{v:?}"));
+        println!();
+    }
+
+    pub fn identity(&mut self) {
+        if self.rows != self.cols {
+            panic!("Not a square matrix!")
+        }
+
+        for r in 0..self.rows {
+            self.data[r][r] = 1.0;
+        }
+    }
+
+    pub fn apply(&mut self, f: impl Fn(f64) -> f64) {
+        self.data = self
+            .data
+            .iter()
+            .map(|v| v.iter().map(|x| f(*x)).collect())
+            .collect();
+    }
+
+    // Alternatives to the apply fn
+    pub fn add(&mut self, m: Matrix) -> Self {
+        if self.rows != m.rows || self.cols != m.cols {
+            panic!("Matices must be of the same size!");
+        }
+
+        let mut sum: Matrix = Matrix::new(self.rows, self.cols);
+
+        for i in 0..self.rows {
+            for j in 0..self.cols {
+                sum.data[i][j] = self.data[i][j] + m.data[i][j];
+            }
+        }
+        sum
+    }
+
+    pub fn subtract(&mut self, m: Matrix) -> Self {
+        if self.rows != m.rows || self.cols != m.cols {
+            panic!("Matices must be of the same size!");
+        }
+
+        let mut diff: Matrix = Matrix::new(self.rows, self.cols);
+
+        for i in 0..self.rows {
+            for j in 0..self.cols {
+                diff.data[i][j] = self.data[i][j] - m.data[i][j];
+            }
+        }
+        diff
+    }
+
+    pub fn dot(&self, m: Matrix) -> Self {
+        if self.rows != m.cols || self.cols != m.rows {
+            panic!(
+                "Dimensions not matched. M1 is {} by {}, M2 is {} by {}",
+                self.rows, self.cols, m.rows, m.cols
+            );
+        }
+
+        let mut dp = Matrix::new(self.rows, m.cols);
+        for i in 0..self.rows {
+            for j in 0..m.rows {
+                let mut sum = 0.0;
+                for k in 0..m.rows {
+                    sum += self.data[i][k] * m.data[k][j];
+                }
+                dp.data[i][j] = sum;
+            }
+        }
+        dp
     }
 }
