@@ -290,7 +290,7 @@ fn correct(m: &mut Matrix) {
 
             let floored = elem.floor();
             // Todo -> Clean up
-            if elem - floored > 0.999999999 {
+            if elem - floored > 0.9999999999 {
                 m.data[row][col] = elem.round();
             }
 
